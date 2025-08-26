@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'login_officer_page.dart';  // Adjust path if needed
+import 'worker_login.dart';       // Add this import for Worker login page
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -24,26 +26,40 @@ class LoginScreen extends StatelessWidget {
             const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {
-                // TODO: Navigate to Municipal Officer login
+                // Navigate to Municipal Officer login
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginOfficerPage()),
+                );
               },
               child: const Text('Municipal Officer'),
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // TODO: Navigate to Worker login
+                // Navigate to Worker login page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WorkerLoginPage()),
+                );
               },
               child: const Text('Worker'),
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // TODO: Navigate to User login
+                // Navigate to User login (TODO)
               },
               child: const Text('User'),
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
             ),
           ],
         ),
