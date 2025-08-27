@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_officer_page.dart';  // Adjust path if needed
 import 'worker_login.dart';       // Add this import for Worker login page
+import 'user_login.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -54,7 +55,10 @@ class LoginScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navigate to User login (TODO)
+                Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserLoginPage()),
+    );
               },
               child: const Text('User'),
               style: ElevatedButton.styleFrom(
