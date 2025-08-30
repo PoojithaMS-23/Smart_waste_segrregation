@@ -33,10 +33,10 @@ class LoginScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const LoginOfficerPage()),
                 );
               },
-              child: const Text('Municipal Officer'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
+              child: const Text('Municipal Officer'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -47,10 +47,10 @@ class LoginScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const WorkerLoginPage()),
                 );
               },
-              child: const Text('Worker'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
+              child: const Text('Worker'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -60,10 +60,10 @@ class LoginScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => const UserLoginPage()),
     );
               },
-              child: const Text('User'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
+              child: const Text('User'),
             ),
           ],
         ),

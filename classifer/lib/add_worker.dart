@@ -17,6 +17,7 @@ class _AddWorkerPageState extends State<AddWorkerPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _workerIdController = TextEditingController();
+  final TextEditingController _areaController = TextEditingController();
 
   // Gender dropdown
   String? _selectedGender;
@@ -28,6 +29,7 @@ class _AddWorkerPageState extends State<AddWorkerPage> {
       age: int.parse(_ageController.text),
       gender: _selectedGender!,
       workerId: _workerIdController.text,
+      area: _areaController.text,
     );
 
     await WorkerDatabase.instance.insertWorker(newWorker);
@@ -105,6 +107,17 @@ class _AddWorkerPageState extends State<AddWorkerPage> {
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter the worker ID';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _areaController,
+              decoration: const InputDecoration(labelText: 'Area'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter the area';
                 }
                 return null;
               },

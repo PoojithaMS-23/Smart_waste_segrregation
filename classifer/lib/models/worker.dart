@@ -4,6 +4,9 @@ class Worker {
   final int age;
   final String gender;
   final String workerId;
+  final String area;
+  final String? username;
+  final String? password;
 
   Worker({
     this.id,
@@ -11,6 +14,9 @@ class Worker {
     required this.age,
     required this.gender,
     required this.workerId,
+    required this.area,
+    this.username,
+    this.password,
   });
 
   // Convert a Worker into a Map
@@ -20,7 +26,10 @@ class Worker {
       'name': name,
       'age': age,
       'gender': gender,
-      'workerId': workerId,
+      'worker_id': workerId,
+      'area': area,
+      'username': username,
+      'password': password,
     };
   }
 
@@ -31,7 +40,10 @@ class Worker {
       name: map['name'],
       age: map['age'],
       gender: map['gender'],
-      workerId: map['workerId'],
+      workerId: map['worker_id'],
+      area: map['area'],
+      username: map['username'] as String?,
+      password: map['password'] as String?,
     );
   }
 }
