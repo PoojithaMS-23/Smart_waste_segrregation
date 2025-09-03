@@ -106,6 +106,35 @@ Future<bool> usernameExists(String username) async {
   }
   return null;
 }
+Future<List<Member>> getMembersByDistrictAndArea(String district, String area) async {
+  final db = await instance.database;
+  final result = await db.query(
+    'members',
+    where: 'district = ? AND area = ?',
+    whereArgs: [district, area],
+  );
+  return result.map((map) => Member.fromMap(map)).toList();
+}
+
+// Get distinct districts
+Future<List<String>> getAllDistricts() async {
+  final db = await instance.database;
+  final result = await db.rawQuery('SELECT DISTINCT district FROM members');
+  return result.map((row) => row['district'] as String).toList();
+}
+
+// Get distinct areas in a district
+Future<List<String>> getAreasByDistrict(String district) async {
+  final db = await instance.database;
+  final result = await db.rawQuery(
+    'SELECT DISTINCT area FROM members WHERE district = ?',
+    [district],
+  );
+  return result.map((row) => row['area'] as String).toList();
+}
+
+
+
 
 
   Future<List<Member>> getAllMembers() async {
@@ -113,6 +142,7 @@ Future<bool> usernameExists(String username) async {
     final result = await db.query('members');
     return result.map((map) => Member.fromMap(map)).toList();
   }
+  
 
   Future close() async {
     final db = await instance.database;

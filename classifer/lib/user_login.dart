@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../db/members_database.dart';
 import '../models/members_model.dart';
 import 'user_register.dart';
+import 'user_dashboard.dart';
 
 class UserLoginPage extends StatefulWidget {
   const UserLoginPage({super.key});
@@ -15,22 +16,29 @@ class _UserLoginPageState extends State<UserLoginPage> {
   final _passwordController = TextEditingController();
 
   void _login() async {
-    final username = _usernameController.text.trim();
-    final password = _passwordController.text.trim();
+  final username = _usernameController.text.trim();
+  final password = _passwordController.text.trim();
 
-    final user = await MemberDatabase.instance.getUserByUsernameAndPassword(username, password);
+  final user = await MemberDatabase.instance.getUserByUsernameAndPassword(username, password);
 
-    if (user != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Welcome, ${user.ownerName}!')),
-      );
-      // Navigate to user dashboard or home
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid username or password')),
-      );
-    }
+  if (user != null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Welcome, ${user.ownerName}!')),
+    );
+    
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserDashboardPage(userName: user.ownerName),
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Invalid username or password')),
+    );
   }
+}
+
 
   void _goToRegister() {
     Navigator.push(
