@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/members_model.dart';
 import '../db/members_database.dart';
+import '../db/Waste_stats.dart'; // Make sure this import points correctly to your WasteStatsDatabase
 
 class MarkPointsPage extends StatefulWidget {
   final String district;
@@ -30,9 +31,22 @@ class _MarkPointsPageState extends State<MarkPointsPage> {
   }
 
   Future<void> _updatePoints(Member member, int delta) async {
+    // Update member points in members table
     member.points += delta;
     await MemberDatabase.instance.updateMember(member);
-    _loadMembers(); // refresh
+
+    // Update area points in waste_stats table
+    if (delta > 0) {
+      // Increment correct points for the area by delta
+      await WasteStatsDatabase.instance.incrementCorrectPoints(widget.district, widget.area, delta);
+    } else if (delta < 0) {
+      // Increment incorrect points by the absolute value of delta
+      await WasteStatsDatabase.instance.incrementIncorrectPoints(widget.district, widget.area, 1);
+
+    }
+
+    // Refresh UI with updated members list
+    _loadMembers();
   }
 
   @override

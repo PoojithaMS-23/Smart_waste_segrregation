@@ -182,7 +182,8 @@ class _LeaderboardTabState extends State<LeaderboardTab> {
     usersWithAccounts.sort((a, b) => b.points.compareTo(a.points));
 
     setState(() {
-      topMembers = usersWithAccounts.take(10).toList();
+      topMembers = usersWithAccounts;
+
     });
   }
 
