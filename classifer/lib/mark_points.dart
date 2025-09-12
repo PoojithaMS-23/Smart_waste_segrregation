@@ -31,23 +31,47 @@ class _MarkPointsPageState extends State<MarkPointsPage> {
   }
 
   Future<void> _updatePoints(Member member, int delta) async {
-    // Update member points in members table
-    member.points += delta;
-    await MemberDatabase.instance.updateMember(member);
+  // Update points
+  member.points += delta;
+  print('Updating ${member.ownerName}: current points = ${member.points - delta}, delta = $delta');
 
-    // Update area points in waste_stats table
-    if (delta > 0) {
-      // Increment correct points for the area by delta
-      await WasteStatsDatabase.instance.incrementCorrectPoints(widget.district, widget.area, delta);
-    } else if (delta < 0) {
-      // Increment incorrect points by the absolute value of delta
-      await WasteStatsDatabase.instance.incrementIncorrectPoints(widget.district, widget.area, 1);
 
-    }
+  // Update taxAfterConcession based on points thresholds
+  if (member.points >= 91 && member.points < 184) {
+  member.taxAfterConcession = member.taxAmount-member.taxAmount * 0.25;
+} else if (member.points >= 184 && member.points < 274) {
+  member.taxAfterConcession = member.taxAmount-member.taxAmount * 0.5;
+} else if (member.points >= 274) {
+  member.taxAfterConcession = member.taxAmount-member.taxAmount * 0.7;
+} else {
+  member.taxAfterConcession = member.taxAmount;
+}
+  int rowsAffected = await MemberDatabase.instance.updateMemberPointsAndTax(
+    member.id!, 
+    member.points, 
+    member.taxAfterConcession,
+  );
+  print('Updated $rowsAffected row(s) for ${member.ownerName}');
 
-    // Refresh UI with updated members list
-    _loadMembers();
+  // Update member in the database with new points and tax concession
+  await MemberDatabase.instance.updateMemberPointsAndTax(member.id!, member.points, member.taxAfterConcession);
+
+
+  // Update area points in waste_stats table
+  if (delta > 0) {
+    await WasteStatsDatabase.instance.incrementCorrectPoints(widget.district, widget.area, delta);
+  } else if (delta < 0) {
+    // For negative delta, increment incorrect points by 1 (based on your logic)
+    await WasteStatsDatabase.instance.incrementIncorrectPoints(widget.district, widget.area, 1);
   }
+
+  // Refresh UI with updated members list
+  setState(() {
+  // The `member` object is already updated — this triggers rebuild
+});
+
+
+}
 
   @override
   Widget build(BuildContext context) {
@@ -67,13 +91,14 @@ class _MarkPointsPageState extends State<MarkPointsPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.add, color: Colors.green),
-                    onPressed: () => _updatePoints(m, 1),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.remove, color: Colors.red),
-                    onPressed: () => _updatePoints(m, -10),
-                  ),
+  icon: const Icon(Icons.add, color: Colors.green),
+  onPressed: () => _updatePoints(m, 1),  // Calls new method with tax update logic
+),
+IconButton(
+  icon: const Icon(Icons.remove, color: Colors.red),
+  onPressed: () => _updatePoints(m, -10),
+),
+
                 ],
               ),
             ),

@@ -1,20 +1,66 @@
 import 'package:flutter/material.dart';
 import '../models/members_model.dart';
 import '../db/members_database.dart';
-import '../db/complaints.dart';  // Make sure this exists and is properly implemented
+import '../db/complaints.dart';
+import 'profile.dart';
 
-class UserDashboardPage extends StatelessWidget {
-  final String userName;
+class UserDashboardPage extends StatefulWidget {
+  final String username;  // Changed from sasId
 
-  const UserDashboardPage({super.key, required this.userName});
+  const UserDashboardPage({super.key, required this.username});
+
+  @override
+  State<UserDashboardPage> createState() => _UserDashboardPageState();
+}
+
+class _UserDashboardPageState extends State<UserDashboardPage> {
+  Member? _member;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMember();
+  }
+
+  Future<void> _loadMember() async {
+    debugPrint('[Dashboard] Loading member with username: ${widget.username}');
+    try {
+      final member = await MemberDatabase.instance.getMemberByUsername(widget.username); // fetch by username
+      if (member == null) {
+        debugPrint('[Dashboard] No member found for username: ${widget.username}');
+      } else {
+        debugPrint('[Dashboard] Member loaded: ${member.ownerName}');
+      }
+      if (mounted) {
+        setState(() {
+          _member = member;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('[Dashboard] Error fetching member: $e');
+      if (mounted) {
+        setState(() {
+          _member = null;
+          _loading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final ownerName = _member?.ownerName;
     return DefaultTabController(
-      length: 4, // Number of tabs
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Welcome, $userName'),
+          title: Text(
+            _loading
+                ? 'Loading...'
+                : (ownerName ?? 'Welcome, ${widget.username}'),
+          ),
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Guidelines'),
@@ -24,11 +70,49 @@ class UserDashboardPage extends StatelessWidget {
             ],
           ),
         ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(color: Colors.teal),
+                child: Text(
+                  'Menu',
+                  style: TextStyle(color: Colors.white, fontSize: 24),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Profile'),
+                onTap: () {
+                  Navigator.pop(context);
+                  if (_member != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ProfilePage(username: _member!.username!), // use username here
+                      ),
+                    );
+                  } else if (_loading) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Still loading member data...")),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("No profile found for this user.")),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
         body: TabBarView(
           children: [
             const GuidelinesTab(),
             const ClassifyWasteTab(),
-            ReportTab(userName: userName), // Pass username here
+            ReportTab(username: widget.username),  // pass username here
             const LeaderboardTab(),
           ],
         ),
@@ -37,7 +121,7 @@ class UserDashboardPage extends StatelessWidget {
   }
 }
 
-// --------------------- Tab 1: Guidelines ---------------------
+/// ---------------- TAB 1: GUIDELINES ----------------
 class GuidelinesTab extends StatelessWidget {
   const GuidelinesTab({super.key});
 
@@ -58,7 +142,7 @@ class GuidelinesTab extends StatelessWidget {
   }
 }
 
-// --------------------- Tab 2: Classify Waste ---------------------
+/// ---------------- TAB 2: CLASSIFY WASTE ----------------
 class ClassifyWasteTab extends StatelessWidget {
   const ClassifyWasteTab({super.key});
 
@@ -88,11 +172,11 @@ class ClassifyWasteTab extends StatelessWidget {
   }
 }
 
-// --------------------- Tab 3: Report ---------------------
+/// ---------------- TAB 3: REPORT ----------------
 class ReportTab extends StatefulWidget {
-  final String userName;  // Accept username
+  final String username;  // changed from sasId
 
-  const ReportTab({super.key, required this.userName});
+  const ReportTab({super.key, required this.username});
 
   @override
   State<ReportTab> createState() => _ReportTabState();
@@ -105,7 +189,7 @@ class _ReportTabState extends State<ReportTab> {
     final message = _controller.text.trim();
     if (message.isNotEmpty) {
       final complaint = {
-        'complainant_username': widget.userName,  // Current user
+        'complainant_username': widget.username,
         'message': message,
         'against': null,
         'timestamp': DateTime.now().toIso8601String(),
@@ -155,7 +239,7 @@ class _ReportTabState extends State<ReportTab> {
   }
 }
 
-// --------------------- Tab 4: Leaderboard ---------------------
+/// ---------------- TAB 4: LEADERBOARD ----------------
 class LeaderboardTab extends StatefulWidget {
   const LeaderboardTab({super.key});
 
@@ -183,7 +267,6 @@ class _LeaderboardTabState extends State<LeaderboardTab> {
 
     setState(() {
       topMembers = usersWithAccounts;
-
     });
   }
 

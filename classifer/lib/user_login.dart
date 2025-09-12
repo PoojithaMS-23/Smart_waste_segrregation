@@ -16,29 +16,35 @@ class _UserLoginPageState extends State<UserLoginPage> {
   final _passwordController = TextEditingController();
 
   void _login() async {
-  final username = _usernameController.text.trim();
-  final password = _passwordController.text.trim();
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
 
-  final user = await MemberDatabase.instance.getUserByUsernameAndPassword(username, password);
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter username and password')),
+      );
+      return;
+    }
 
-  if (user != null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Welcome, ${user.ownerName}!')),
-    );
-    
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => UserDashboardPage(userName: user.ownerName),
-      ),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Invalid username or password')),
-    );
+    final user = await MemberDatabase.instance.getUserByUsernameAndPassword(username, password);
+
+    if (user != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Welcome, ${user.ownerName}!')),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UserDashboardPage(username: user.username!),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid username or password')),
+      );
+    }
   }
-}
-
 
   void _goToRegister() {
     Navigator.push(
@@ -50,11 +56,9 @@ class _UserLoginPageState extends State<UserLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('User Login'),
-      ),
+      appBar: AppBar(title: const Text('User Login')),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             TextField(
@@ -68,10 +72,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
               obscureText: true,
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _login,
-              child: const Text('Login'),
-            ),
+            ElevatedButton(onPressed: _login, child: const Text('Login')),
             const SizedBox(height: 10),
             TextButton(
               onPressed: _goToRegister,

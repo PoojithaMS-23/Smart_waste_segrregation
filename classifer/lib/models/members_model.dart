@@ -10,8 +10,9 @@ class Member {
   double taxAmount;
   double taxAfterConcession;
 
-  String? username;  // nullable
-  String? password;  // nullable
+  String? username;
+  String? password; // stored as hashed string or null
+  String? houseType;
 
   Member({
     this.id,
@@ -26,6 +27,7 @@ class Member {
     this.taxAfterConcession = 0.0,
     this.username,
     this.password,
+    this.houseType,
   });
 
   Map<String, dynamic> toMap() {
@@ -42,23 +44,25 @@ class Member {
       'tax_after_concession': taxAfterConcession,
       'username': username,
       'password': password,
+      'house_type': houseType,
     };
   }
 
   factory Member.fromMap(Map<String, dynamic> map) {
     return Member(
-      id: map['id'],
-      ownerName: map['owner_name'],
-      doorNumber: map['door_number'],
-      area: map['area'],
-      district: map['district'],
-      pid: map['pid'],
-      sasId: map['sas_id'],
-      points: map['points'],
-      taxAmount: map['tax_amount'],
-      taxAfterConcession: map['tax_after_concession'],
-      username: map['username'] as String?,
-      password: map['password'] as String?,
+      id: map['id'] is int ? map['id'] as int : int.tryParse(map['id'].toString()),
+      ownerName: map['owner_name'] ?? '',
+      doorNumber: map['door_number'] ?? '',
+      area: map['area'] ?? '',
+      district: map['district'] ?? '',
+      pid: map['pid'] ?? '',
+      sasId: map['sas_id'] ?? '',
+      points: map['points'] ?? 0,
+      taxAmount: (map['tax_amount'] is num) ? (map['tax_amount'] as num).toDouble() : 0.0,
+      taxAfterConcession: (map['tax_after_concession'] is num) ? (map['tax_after_concession'] as num).toDouble() : 0.0,
+      username: map['username'],
+      password: map['password'],
+      houseType: map['house_type'],
     );
   }
 }

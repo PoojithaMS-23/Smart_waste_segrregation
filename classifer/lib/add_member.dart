@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/members_model.dart';
 import '../db/members_database.dart';
 
-
 class AddMemberPage extends StatefulWidget {
   const AddMemberPage({super.key});
 
@@ -20,9 +19,16 @@ class _AddMemberPageState extends State<AddMemberPage> {
 
   String? selectedArea;
   String? selectedDistrict;
+  String? selectedHouseType;
 
   List<String> areas = ['Area 1', 'Area 2'];
   List<String> districts = ['District 1', 'District 2'];
+
+  final List<String> houseTypes = [
+    'commercial',
+    'semi-commercial',
+    'non commercial',
+  ];
 
   void _addNewArea() {
     showDialog(
@@ -88,12 +94,28 @@ class _AddMemberPageState extends State<AddMemberPage> {
 
   void _submitForm() async {
   if (_formKey.currentState!.validate()) {
-    if (selectedArea == null || selectedDistrict == null) {
+    if (selectedArea == null || selectedDistrict == null || selectedHouseType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select area and district.')),
+        const SnackBar(content: Text('Please select area, district, and house type.')),
       );
       return;
     }
+
+    double taxAmount;
+    switch (selectedHouseType) {
+      case 'commercial':
+        taxAmount = 3000;
+        break;
+      case 'semi-commercial':
+        taxAmount = 2000;
+        break;
+      case 'non commercial':
+        taxAmount = 1000;
+        break;
+      default:
+        taxAmount = 0;
+    }
+    final taxAfterConcession = taxAmount;  // same for now
 
     final newMember = Member(
       ownerName: _ownerNameController.text.trim(),
@@ -102,16 +124,29 @@ class _AddMemberPageState extends State<AddMemberPage> {
       district: selectedDistrict!,
       pid: _pidController.text.trim(),
       sasId: _sasIdController.text.trim(),
+      houseType: selectedHouseType!,
+      taxAmount: taxAmount,
+      taxAfterConcession: taxAfterConcession,  // set equal for now
     );
 
     try {
-      await MemberDatabase.instance.insertMember(newMember);
+      // Save member and get the inserted row ID
+      final insertedId = await MemberDatabase.instance.insertMember(newMember);
+      print('Inserted member ID: $insertedId');
+
+      // Query the database for house_type of the inserted member
+      final db = await MemberDatabase.instance.database;
+      final result = await db.rawQuery(
+        "SELECT house_type FROM members WHERE id = ?", 
+        [insertedId],
+      );
+      print('House type from DB: $result');
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Member added successfully!')),
       );
 
-      // Optional: Clear the form
+      // Clear form fields and reset selections
       _formKey.currentState!.reset();
       _ownerNameController.clear();
       _doorNumberController.clear();
@@ -121,6 +156,7 @@ class _AddMemberPageState extends State<AddMemberPage> {
       setState(() {
         selectedArea = null;
         selectedDistrict = null;
+        selectedHouseType = null;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -207,6 +243,21 @@ class _AddMemberPageState extends State<AddMemberPage> {
                   onPressed: _addNewDistrict,
                 ),
               ],
+            ),
+            const SizedBox(height: 10),
+
+            DropdownButtonFormField<String>(
+              value: selectedHouseType,
+              hint: const Text('Select House Type'),
+              items: houseTypes
+                  .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedHouseType = value;
+                });
+              },
+              validator: (value) => value == null ? 'Select House Type' : null,
             ),
             const SizedBox(height: 10),
 
