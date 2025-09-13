@@ -1,0 +1,12 @@
+# Python virtual environment
+venv_tf211/
+__pycache__/
+uploads/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

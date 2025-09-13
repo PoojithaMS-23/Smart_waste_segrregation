@@ -1,0 +1,5 @@
+0 biodegradable
+1 recyclable
+2 non-recyclable
+3 hazardous
+4 e-waste
