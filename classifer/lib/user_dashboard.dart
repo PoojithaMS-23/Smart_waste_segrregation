@@ -3,6 +3,7 @@ import '../models/members_model.dart';
 import '../db/members_database.dart';
 import '../db/complaints.dart';
 import 'profile.dart';
+import 'scan_classify.dart';
 
 class UserDashboardPage extends StatefulWidget {
   final String username;  // Changed from sasId
@@ -53,7 +54,7 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
   Widget build(BuildContext context) {
     final ownerName = _member?.ownerName;
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -65,6 +66,7 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
             tabs: [
               Tab(text: 'Guidelines'),
               Tab(text: 'Classify Waste'),
+              Tab(text: 'Scan to Classify'),
               Tab(text: 'Report'),
               Tab(text: 'Leaderboard'),
             ],
@@ -112,6 +114,8 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
           children: [
             const GuidelinesTab(),
             const ClassifyWasteTab(),
+            const ScanClassifyTab(),
+            const ScanClassifyTab(),
             ReportTab(username: widget.username),  // pass username here
             const LeaderboardTab(),
           ],
