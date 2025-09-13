@@ -54,7 +54,7 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
   Widget build(BuildContext context) {
     final ownerName = _member?.ownerName;
     return DefaultTabController(
-      length: 5,
+      length: 5,  // increased by 1 for adding the Scan to classify tab
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -66,7 +66,7 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
             tabs: [
               Tab(text: 'Guidelines'),
               Tab(text: 'Classify Waste'),
-              Tab(text: 'Scan to Classify'),
+              Tab(text: 'Scan to Classify'), // tab for uploading image and classifying
               Tab(text: 'Report'),
               Tab(text: 'Leaderboard'),
             ],
@@ -114,8 +114,7 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
           children: [
             const GuidelinesTab(),
             const ClassifyWasteTab(),
-            const ScanClassifyTab(),
-            const ScanClassifyTab(),
+            const ScanClassifyTab(), // for classifying page
             ReportTab(username: widget.username),  // pass username here
             const LeaderboardTab(),
           ],

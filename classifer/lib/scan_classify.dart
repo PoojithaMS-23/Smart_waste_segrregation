@@ -2,22 +2,25 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/api_service.dart';
+import '../services/api_service.dart'; // adjust path to your ApiService
 
 class ScanClassifyTab extends StatefulWidget {
-  const ScanClassifyTab({Key? key}) : super(key: key);
+  const ScanClassifyTab({super.key});
 
   @override
   State<ScanClassifyTab> createState() => _ScanClassifyTabState();
 }
 
 class _ScanClassifyTabState extends State<ScanClassifyTab> {
-  File? _selectedImage;      // picked image
-  String predictionText = ""; // prediction result
+  File? _selectedImage;
+  String predictionText = "";
+  bool _loading = false;
 
-  void pickImage() async {
-    final pickedFile =
-    await ImagePicker().pickImage(source: ImageSource.gallery);
+  final ImagePicker _picker = ImagePicker();
+
+  /// pick image from gallery
+  Future<void> _pickFromGallery() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
@@ -26,30 +29,50 @@ class _ScanClassifyTabState extends State<ScanClassifyTab> {
     }
   }
 
-  void predictImage() async {
+  /// capture image from camera
+  Future<void> _captureFromCamera() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+        predictionText = "";
+      });
+    }
+  }
+
+  /// upload to API
+  Future<void> _predictImage() async {
     if (_selectedImage == null) return;
 
-    String result = await ApiService.uploadImage(_selectedImage!);
+    setState(() {
+      _loading = true;
+    });
+
+    final result = await ApiService.uploadImage(_selectedImage!);
+
     try {
-      var decoded = json.decode(result);
+      final decoded = json.decode(result);
       setState(() {
-        predictionText = decoded['prediction'];
+        predictionText = decoded['prediction'] ?? "No prediction returned";
       });
     } catch (e) {
       setState(() {
         predictionText = "Error parsing response";
+      });
+    } finally {
+      setState(() {
+        _loading = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Image box
           _selectedImage != null
               ? Image.file(
             _selectedImage!,
@@ -64,19 +87,41 @@ class _ScanClassifyTabState extends State<ScanClassifyTab> {
             child: Icon(Icons.image, size: 100, color: Colors.grey[700]),
           ),
           const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+
+          // Buttons section with Wrap (replacing Row with wrap)
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            alignment: WrapAlignment.center,
             children: [
-              ElevatedButton(onPressed: pickImage, child: const Text("Upload")),
-              const SizedBox(width: 20),
-              ElevatedButton(onPressed: predictImage, child: const Text("Predict")),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.photo_library),
+                onPressed: _pickFromGallery,
+                label: const Text("Gallery"),
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.camera_alt),
+                onPressed: _captureFromCamera,
+                label: const Text("Camera"),
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.send),
+                onPressed: _loading ? null : _predictImage,
+                label: const Text("Predict"),
+              ),
             ],
           ),
+
           const SizedBox(height: 20),
-          Text(
-            predictionText,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
+
+          if (_loading) const CircularProgressIndicator(),
+
+          if (predictionText.isNotEmpty && !_loading)
+            Text(
+              predictionText,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
         ],
       ),
     );
